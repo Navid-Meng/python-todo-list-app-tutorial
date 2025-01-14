@@ -5,18 +5,20 @@ class TodoList:
     def __init__(self):
         self.tasks = []
         self.filename = "tasks.json"
+        self.id_counter = 1  # Start the counter at 1
         self.load_tasks()
 
     def add_task(self, description):
         """Add a new task"""
         task = {
-            'id': len(self.tasks) + 1,
+            'id': self.id_counter,  # Use the counter for the task ID
             'description': description,
             'completed': False,
             'created_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
 
         self.tasks.append(task)
+        self.id_counter += 1  # Increment the counter
         self.save_task()
         print(f"Task '{description}' added successfully!")
 
@@ -64,16 +66,23 @@ class TodoList:
 
     def save_task(self):
         """Save tasks to file"""
+        data = {
+            'tasks': self.tasks,
+            'id_counter': self.id_counter  # Save the counter
+        }
         with open(self.filename, 'w') as file:
-            json.dump(self.tasks, file, indent=2)
+            json.dump(data, file, indent=2)
     
     def load_tasks(self):
         """Load tasks from file if it exists"""
         try:
             with open(self.filename, 'r') as file:
-                self.tasks = json.load(file)
+                data = json.load(file)
+                self.tasks = data.get('tasks', [])
+                self.id_counter = data.get('id_counter', 1) # Default to 1 if not found
         except FileNotFoundError:
             self.tasks = []
+            self.id_counter = 1
 
 def main():
     todo = TodoList()
